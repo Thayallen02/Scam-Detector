@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Scam Checker</title>
+</head>
+<body>
+    <h2>Bitcoin Scam Checker</h2>
+    <form method="POST">
+        <input type="text" name="btc_address" placeholder="Enter Bitcoin Address" required>
+        <button type="submit">Check</button>
+    </form>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if address %}
+        <h3>Results for {{ address }}</h3>
+        <p>Scam Status: <strong>{{ "⚠️ SCAM DETECTED" if scam_detected else "✅ Legitimate" }}</strong></p>
+        <h3>Transaction Screenshot</h3>
+        <img src="{{ screenshot }}" alt="Transaction Screenshot" width="600">
+    {% endif %}
+</body>
+</html>
