@@ -11,8 +11,8 @@ ETHERSCAN_API_KEY = "EVWY88Y9UDYU4JYTBFHRN7WNPVA253YRTA"
 def is_bitcoin_address(address):
     return bool(re.match(r"^[13][a-km-zA-HJ-NP-Z0-9]{25,34}$", address))
 
-def is_bitcoin_address(address):
-    return bool(re.match(r"^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$"))
+def is_ethereum_address(address):
+    return bool(re.match(r"^0x[a-fA-F0-9]{40}$", address))
 
 @st.cache_data(show_spinner=False)
 def fetch_scam_bitcoin_addresses():
@@ -20,19 +20,14 @@ def fetch_scam_bitcoin_addresses():
     try:
         response = requests.get(url)
         response.raise_for_status()
-        btc_pattern = re.compile(r'\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b')
+        btc_pattern = re.compile(r'\b[13][a-km-zA-HJ-NP-Z0-9]{25,34}\b')
         addresses = btc_pattern.findall(response.text)
         return set(addresses)
     except requests.RequestException:
         return set()
 
 def check_bitcoin_scam_activity(address, scam_list):
-    results = {}
-    if address in scam_list:
-        results["reported"] = True
-    else:
-        results["reported"] = False
-
+    results = {"reported": address in scam_list}
     url = f"https://blockchain.info/rawaddr/{address}"
     try:
         response = requests.get(url)
@@ -124,7 +119,6 @@ def plot_metrics(metrics):
             metrics.get("high_recipients", 0)
         ]
     })
-
     fig, ax = plt.subplots()
     ax.bar(df["Metric"], df["Count"])
     ax.set_title("Transaction Metrics")
@@ -134,7 +128,6 @@ def plot_scam_pie(result):
     labels = ['Suspicious', 'Not Suspicious']
     sizes = [1 if result.get("behavior_scam") else 0, 1 if not result.get("behavior_scam") else 0]
     colors = ['red', 'green']
-
     fig, ax = plt.subplots()
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors, startangle=140)
     ax.axis('equal')
@@ -186,7 +179,6 @@ if st.button("Check Scam Status"):
                 st.write(f"📥 Total Inward Transfers: `{result['inward']}`")
                 st.write(f"📤 Total Outward Transfers: `{result['outward']}`")
                 st.write(f"💰 Large Transactions (>1 ETH): `{result['large_tx']}`")
-
                 plot_metrics({
                     "inward": result["inward"],
                     "outward": result["outward"],
