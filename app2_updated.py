@@ -3,6 +3,7 @@ import requests
 import re
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 
 ETHERSCAN_API_KEY = "EVWY88Y9UDYU4JYTBFHRN7WNPVA253YRTA"
 
@@ -119,18 +120,24 @@ def plot_metrics(metrics):
             metrics.get("high_recipients", 0)
         ]
     })
-    fig, ax = plt.subplots()
-    ax.bar(df["Metric"], df["Count"])
-    ax.set_title("Transaction Metrics")
-    st.pyplot(fig)
 
-def plot_scam_pie(result):
-    labels = ['Suspicious', 'Not Suspicious']
-    sizes = [1 if result.get("behavior_scam") else 0, 1 if not result.get("behavior_scam") else 0]
-    colors = ['red', 'green']
-    fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors, startangle=140)
-    ax.axis('equal')
+    colors = ['#3498db', '#f39c12', '#e74c3c' if df.loc[2, "Count"] > 2 else '#2ecc71',
+              '#e74c3c' if df.loc[3, "Count"] > 2 else '#2ecc71']
+
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    bars = ax.barh(df["Metric"], df["Count"], color=colors, edgecolor='black', linewidth=0.5)
+
+    ax.set_xlabel("Transaction Count", fontsize=11)
+    ax.set_title("📊 Address Transaction Behavior", fontsize=13, fontweight='bold')
+    ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+    ax.grid(axis='x', linestyle='--', alpha=0.7)
+
+    for bar in bars:
+        width = bar.get_width()
+        ax.annotate(f'{width}', xy=(width, bar.get_y() + bar.get_height() / 2),
+                    xytext=(5, 0), textcoords='offset points',
+                    ha='left', va='center', fontsize=10)
+
     st.pyplot(fig)
 
 # === Streamlit App ===
@@ -162,7 +169,6 @@ if st.button("Check Scam Status"):
                 st.write(f"💰 Large Transactions (>1 BTC): `{result['large_tx']}`")
                 st.write(f"🔀 High-Recipient Transactions (>10): `{result['high_recipients']}`")
                 plot_metrics(result)
-                plot_scam_pie(result)
 
                 if result.get("behavior_scam"):
                     st.warning("⚠️ Behavioral pattern suggests potential scam activity.")
@@ -185,7 +191,6 @@ if st.button("Check Scam Status"):
                     "large_tx": result["large_tx"],
                     "high_recipients": 0
                 })
-                plot_scam_pie(result)
 
                 if result.get("behavior_scam"):
                     st.warning("⚠️ Behavioral pattern suggests potential scam activity.")
