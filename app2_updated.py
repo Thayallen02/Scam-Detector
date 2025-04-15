@@ -8,8 +8,8 @@ ETHERSCAN_API_KEY = "EVWY88Y9UDYU4JYTBFHRN7WNPVA253YRTA"
 
 # === Functions ===
 
-def is_ethereum_address(address):
-    return bool(re.match(r"^0x[a-fA-F0-9]{40}$", address))
+def is_bitcoin_address(address):
+    return bool(re.match(r"^[13][a-km-zA-HJ-NP-Z0-9]{25,34}$", address))
 
 def is_bitcoin_address(address):
     return bool(re.match(r"^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$"))
